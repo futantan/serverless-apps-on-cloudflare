@@ -10,9 +10,21 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
+import { Router } from 'itty-router';
+import createImage from './handlers/create_image';
+import getImages from './handlers/get_images';
+import getSingleImage from './handlers/get_single_image';
+
+const router = Router();
+router
+	.get('/images', getImages)
+	.get('/images/:id', getSingleImage)
+	.post('/images', createImage)
+	.get('/test', () => new Response('Test endpoint', { status: 200 }))
+	.get('*', () => new Response('Not found', { status: 404 }));
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+		return router.fetch(request);
 	},
 } satisfies ExportedHandler<Env>;
