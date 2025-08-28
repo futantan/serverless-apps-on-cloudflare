@@ -1,17 +1,36 @@
 import { IRequest } from 'itty-router';
-import { ALL_IMAGES } from '../image_store';
+import { Env } from '../env';
 
-const getImages = (request: IRequest) => {
-	let images = ALL_IMAGES;
+const getImages = async (request: IRequest, env: Env) => {
+	const limit = request.query.count ? Number(request.query.count) : 10;
+	let results;
 
-	if (request.query.count) {
-		images = images.slice(0, Number(request.query.count));
+	try {
+		results = await env.DB.prepare(
+			`
+			SELECT i.*, c.display_name AS category_display_name
+			FROM images i
+			INNER JOIN image_categories c ON i.category_id = c.id
+			ORDER BY created_at DESC
+			LIMIT ?1
+			`
+		)
+			.bind(limit)
+			.all();
+	} catch (e) {
+		let message;
+		if (e instanceof Error) message = e.message;
+
+		console.log({ message });
+		return new Response('Error', { status: 500 });
 	}
 
-	return new Response(JSON.stringify(images), {
-		headers: {
-			'Content-Type': 'application/json',
-		},
+	if (!results.success) {
+		return new Response('There was a problem retrieving images', { status: 500 });
+	}
+
+	return new Response(JSON.stringify(results.results), {
+		headers: { 'Content-Type': 'application/json' },
 	});
 };
 

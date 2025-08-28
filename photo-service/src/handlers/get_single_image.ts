@@ -1,14 +1,34 @@
 import { IRequest } from 'itty-router';
-import { ALL_IMAGES } from '../image_store';
+import { Env } from '../env';
 
-const getSingleImage = (request: IRequest) => {
-	let image = ALL_IMAGES.find((i) => i.id === Number(request.params.id));
+const getSingleImage = async (request: IRequest, env: Env) => {
+	let result;
 
-	if (!image) {
-		return new Response('Image not found', { status: 404 });
+	try {
+		result = await env.DB.prepare(
+			`
+			SELECT i.*, c.display_name AS category_display_name
+			FROM images i
+			INNER JOIN image_categories c ON i.category_id = c.id
+			WHERE i.id = ?1
+		`
+		)
+			.bind(Number(request.params.id))
+			.first();
+	} catch (e) {
+		let message;
+		if (e instanceof Error) message = e.message;
+
+		console.log({ message });
+
+		return new Response('Error', { status: 500 });
 	}
 
-	return new Response(JSON.stringify(image), {
+	if (!result) {
+		return new Response('Not found', { status: 404 });
+	}
+
+	return new Response(JSON.stringify(result), {
 		headers: { 'Content-Type': 'application/json' },
 	});
 };

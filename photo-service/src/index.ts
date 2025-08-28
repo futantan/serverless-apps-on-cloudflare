@@ -11,6 +11,7 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 import { Router } from 'itty-router';
+import { Env } from './env';
 import createImage from './handlers/create_image';
 import getImages from './handlers/get_images';
 import getSingleImage from './handlers/get_single_image';
@@ -24,7 +25,7 @@ router
 	.get('*', () => new Response('Not found', { status: 404 }));
 
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return router.fetch(request);
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		return router.fetch(request, env);
 	},
 } satisfies ExportedHandler<Env>;
