@@ -16,7 +16,7 @@
 			"database_name": "photo-service",
 			"database_id": "7015dbf2-1502-4570-a390-f216acd447aa"
 		}
-	]
+	],
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
@@ -46,5 +46,5 @@
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
 	 */
-	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+	"services": [{ "binding": "AUTH", "service": "authentication-service" }]
 }

@@ -11,8 +11,18 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+export interface Env {
+	API_AUTH_KEY: string;
+}
+
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
-		return new Response('Hello World!');
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		const api_key = request.headers.get('x-api-auth-key');
+
+		if (api_key === env.API_AUTH_KEY) {
+			return new Response('Authenticated!', { status: 200 });
+		}
+
+		return new Response('Unauthorized', { status: 401 });
 	},
 } satisfies ExportedHandler<Env>;
